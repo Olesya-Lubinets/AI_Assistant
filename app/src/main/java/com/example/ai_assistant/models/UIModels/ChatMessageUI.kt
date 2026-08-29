@@ -5,6 +5,7 @@ data class ChatMessageUI (
     val text:String
 )
 
+
 enum class SenderType {
  USER, AI
 }

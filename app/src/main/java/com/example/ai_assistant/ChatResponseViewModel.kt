@@ -1,40 +1,73 @@
 package com.example.ai_assistant
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ai_assistant.models.ChatRequestModels.MessageRequest
-import com.example.ai_assistant.models.ChatResponseModels.ChatResponse
-import com.example.ai_assistant.models.UIModels.ChatMessageUI
+import com.example.ai_assistant.models.dbModels.DBChat
+import com.example.ai_assistant.models.dbModels.toDBMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ChatResponseViewModel @Inject constructor(private val repository:ChatResponseRepository):ViewModel() {
+class ChatResponseViewModel @Inject constructor(
+    private val apiRepository: APIResponseRepository,
+    private val messageRepository: MessageRepository,
+    private val chatRepository: ChatRepository
+) : ViewModel() {
 
-    private val _response = MutableLiveData<ChatResponse> ()
-    val response:LiveData<ChatResponse> = _response
+    private val _chatID = MutableStateFlow<Long?>(null)
+    val chatID: StateFlow<Long?> = _chatID.asStateFlow()
 
-    private val _apiMessagesHistory = MutableLiveData<List<MessageRequest>>(emptyList())
-    val apiMessagesHistory:LiveData<List<MessageRequest>> = _apiMessagesHistory
+   // private val _response = MutableSharedFlow<ChatResponse>()
+   // val response: SharedFlow<ChatResponse> = _response.asSharedFlow()
 
-    private val _uiChatHistory = MutableLiveData<List<ChatMessageUI>>(emptyList())
-    val uiChatHistory:LiveData<List<ChatMessageUI>> = _uiChatHistory
+    val apiMessagesHistory: StateFlow<List<MessageRequest>> =
+        chatID
+            .filterNotNull()
+            .flatMapLatest {  messageRepository.getAllMessagesByChatID(it) }
+            .map { messages -> messages.map { it.toMessageRequest() }}
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
 
-    fun getResponse(request: List<MessageRequest>) {
+    fun createChat() {
         viewModelScope.launch {
-         _response.value = repository.getChatResponse(request) }
+            val id = chatRepository.addChat(
+                DBChat(
+                    title = "Some chat name",
+                    createdAt = System.currentTimeMillis()
+                )
+            )
+            _chatID.value = id
+        }
     }
 
-    fun addToAPIMessagesHistory(message:MessageRequest) {
-        _apiMessagesHistory.value = apiMessagesHistory.value + message
+    fun sendMessageAndGetResponse(query:String) {
+        viewModelScope.launch {
+            val currentChatID = chatID.value ?: return@launch
+            val currentHistory = apiMessagesHistory.value
+
+            val userMessage = query.toDBMessage(currentChatID)
+
+            messageRepository.addMessage(userMessage)
+
+            val updatedHistory =  currentHistory + userMessage.toMessageRequest()
+
+            val modelResponse = apiRepository.getChatResponse(updatedHistory)
+            messageRepository.addMessage(modelResponse.toDBMessage(currentChatID))
+            //_response.emit(modelResponse)
+        }
     }
 
-    fun addToUIChatHistory(message:ChatMessageUI) {
-        _uiChatHistory.value = uiChatHistory.value + message
-    }
-
-    fun getHistoryMessagesOnce():List<MessageRequest> = apiMessagesHistory.value ?: emptyList()
 }

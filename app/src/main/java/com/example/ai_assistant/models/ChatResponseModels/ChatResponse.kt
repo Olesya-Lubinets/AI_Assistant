@@ -1,5 +1,8 @@
 package com.example.ai_assistant.models.ChatResponseModels
 
+import com.example.ai_assistant.models.UIModels.ChatMessageUI
+import com.example.ai_assistant.models.UIModels.SenderType
+import com.example.ai_assistant.models.dbModels.DBMessage
 import com.google.gson.annotations.SerializedName
 
 data class ChatResponse (
@@ -9,4 +12,15 @@ data class ChatResponse (
     val usage: Usage?,
     @SerializedName("object")
     val objectType: String
-)
+) {
+    fun toDBMessage(chatID:Long):DBMessage =  DBMessage(
+        sender = SenderType.AI,
+        content = choices.first().message.content?: "",
+        chatID = chatID,
+        createdAt = created
+    )
+    fun toChatMessageUI():ChatMessageUI = ChatMessageUI(
+        sender = SenderType.AI,
+        text = choices.first().message.content?: ""
+    )
+}
