@@ -23,6 +23,10 @@ interface DBMessageDAO {
     @Query("SELECT * FROM messages WHERE id = :id")
     suspend fun getById(id: Long): DBMessage?
 
-    @Query("SELECT * FROM messages WHERE chatID=:chatID")
+    @Query("""
+    SELECT * FROM messages
+    WHERE chatID = :chatID
+    ORDER BY id ASC
+""")
     fun getMessagesByChatID(chatID:Long): Flow<List<DBMessage>>
 }

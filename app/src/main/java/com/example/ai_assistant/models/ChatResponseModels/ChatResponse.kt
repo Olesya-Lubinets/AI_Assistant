@@ -17,7 +17,7 @@ data class ChatResponse (
         sender = SenderType.AI,
         content = choices.first().message.content?: "",
         chatID = chatID,
-        createdAt = created
+        createdAt = System.currentTimeMillis() / 1000
     )
     fun toChatMessageUI():ChatMessageUI = ChatMessageUI(
         sender = SenderType.AI,

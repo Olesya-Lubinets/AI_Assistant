@@ -3,9 +3,12 @@ package com.example.ai_assistant
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ai_assistant.models.ChatRequestModels.MessageRequest
+import com.example.ai_assistant.models.UIModels.ChatMessageUI
 import com.example.ai_assistant.models.dbModels.DBChat
+import com.example.ai_assistant.models.dbModels.DBMessage
 import com.example.ai_assistant.models.dbModels.toDBMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -30,11 +33,23 @@ class ChatResponseViewModel @Inject constructor(
    // private val _response = MutableSharedFlow<ChatResponse>()
    // val response: SharedFlow<ChatResponse> = _response.asSharedFlow()
 
-    val apiMessagesHistory: StateFlow<List<MessageRequest>> =
+    private val messagesFromDB: Flow<List<DBMessage>> =
         chatID
             .filterNotNull()
             .flatMapLatest {  messageRepository.getAllMessagesByChatID(it) }
+
+    val messagesForAPI: StateFlow<List<MessageRequest>> =
+       messagesFromDB
             .map { messages -> messages.map { it.toMessageRequest() }}
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
+
+    val messagesForUI:StateFlow<List<ChatMessageUI>> =
+        messagesFromDB
+            .map { messages -> messages.map { it.toChatMessageUI() }}
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
@@ -46,7 +61,7 @@ class ChatResponseViewModel @Inject constructor(
             val id = chatRepository.addChat(
                 DBChat(
                     title = "Some chat name",
-                    createdAt = System.currentTimeMillis()
+                    createdAt = System.currentTimeMillis() / 1000
                 )
             )
             _chatID.value = id
@@ -56,7 +71,7 @@ class ChatResponseViewModel @Inject constructor(
     fun sendMessageAndGetResponse(query:String) {
         viewModelScope.launch {
             val currentChatID = chatID.value ?: return@launch
-            val currentHistory = apiMessagesHistory.value
+            val currentHistory = messagesForAPI.value
 
             val userMessage = query.toDBMessage(currentChatID)
 

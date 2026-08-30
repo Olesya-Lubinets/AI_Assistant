@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 import com.example.ai_assistant.models.ChatRequestModels.AssistantMessageRequest
 import com.example.ai_assistant.models.ChatRequestModels.MessageRequest
 import com.example.ai_assistant.models.ChatRequestModels.UserMessageRequest
+import com.example.ai_assistant.models.UIModels.ChatMessageUI
 import com.example.ai_assistant.models.UIModels.SenderType
 
 
@@ -39,12 +40,19 @@ data class DBMessage (
             else -> throw  Exception("Unknown sender type")
         }
     }
+
+    fun  toChatMessageUI():ChatMessageUI {
+        return  ChatMessageUI(
+            sender = sender,
+            text = content
+        )
+    }
 }
 
 fun String.toDBMessage(chatID: Long): DBMessage = DBMessage(
     sender = SenderType.USER,
     content = this,
     chatID = chatID,
-    createdAt =  System.currentTimeMillis()
+    createdAt =  System.currentTimeMillis() / 1000
 )
 

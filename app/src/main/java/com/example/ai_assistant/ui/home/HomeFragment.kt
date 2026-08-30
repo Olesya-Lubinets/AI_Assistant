@@ -45,9 +45,9 @@ class HomeFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                messageViewModel.apiMessagesHistory.collect { messageHistory ->
+                messageViewModel.messagesForUI.collect { messageHistory ->
                     Log.d("Observe chat history", messageHistory.joinToString())
-                    adapter.submitList(messageHistory.map { it.toUI() })
+                    adapter.submitList(messageHistory)
                     recyclerView.scrollToPosition(messageHistory.lastIndex)
                 }
             }
@@ -61,6 +61,7 @@ class HomeFragment : Fragment() {
                     messageViewModel.sendMessageAndGetResponse(query)
                 }
                 searchView.clearFocus()
+                searchView.setQuery("", false)
                 return true
             }
 
