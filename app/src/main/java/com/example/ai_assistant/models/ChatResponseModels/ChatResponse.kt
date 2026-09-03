@@ -19,8 +19,4 @@ data class ChatResponse (
         chatID = chatID,
         createdAt = System.currentTimeMillis() / 1000
     )
-    fun toChatMessageUI():ChatMessageUI = ChatMessageUI(
-        sender = SenderType.AI,
-        text = choices.first().message.content?: ""
-    )
 }

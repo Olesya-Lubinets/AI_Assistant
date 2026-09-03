@@ -43,6 +43,7 @@ data class DBMessage (
 
     fun  toChatMessageUI():ChatMessageUI {
         return  ChatMessageUI(
+            id = id,
             sender = sender,
             text = content
         )

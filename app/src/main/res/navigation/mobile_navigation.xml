@@ -3,19 +3,27 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_home">
+    app:startDestination="@+id/nav_list_chats">
 
     <fragment
-        android:id="@+id/nav_home"
-        android:name="com.example.ai_assistant.ui.home.HomeFragment"
-        android:label="@string/menu_home"
-        tools:layout="@layout/fragment_home" />
+        android:id="@+id/nav_chat"
+        android:name="com.example.ai_assistant.ui.home.ChatFragment"
+        android:label="Some chat"
+        tools:layout="@layout/fragment_new_chat">
+        <argument
+            android:name="chatID"
+            app:argType="long" />
+    </fragment>
 
     <fragment
-        android:id="@+id/nav_gallery"
-        android:name="com.example.ai_assistant.ui.gallery.GalleryFragment"
-        android:label="@string/menu_gallery"
-        tools:layout="@layout/fragment_gallery" />
+        android:id="@+id/nav_list_chats"
+        android:name="com.example.ai_assistant.ui.gallery.ChatListFragment"
+        android:label="List of chats"
+        tools:layout="@layout/fragment_list_chats">
+    <action
+        android:id="@+id/action_chatListFragment_to_chatFragment"
+        app:destination="@id/nav_chat" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_slideshow"

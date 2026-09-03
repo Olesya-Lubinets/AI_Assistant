@@ -26,6 +26,7 @@ data class UserMessageRequest(
     val attachments: List<String>? = null,
     override val content: String
 ) : MessageRequest
+fun String.toUserMessageRequest():UserMessageRequest = UserMessageRequest(content = this)
 
 
 data class FunctionMessageRequest(

@@ -11,6 +11,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.ai_assistant.ChatResponseViewModel
@@ -19,20 +20,25 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class HomeFragment : Fragment() {
+class ChatFragment : Fragment() {
 
     val messageViewModel: ChatResponseViewModel by viewModels()
+    private val args: ChatFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return inflater.inflate(R.layout.fragment_home, container, false)
+        return inflater.inflate(R.layout.fragment_new_chat, container, false)
     }
     
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val chatID = args.chatID
+        messageViewModel.setChatID(chatID)
+
         val searchView = view.findViewById<SearchView>(R.id.homeSearchView)
         val recyclerView = view.findViewById<RecyclerView>(R.id.homeRecyclerView)
 
@@ -41,14 +47,16 @@ class HomeFragment : Fragment() {
         val adapter = MessageAdapter()
         recyclerView.adapter = adapter
 
-        messageViewModel.createChat()
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 messageViewModel.messagesForUI.collect { messageHistory ->
                     Log.d("Observe chat history", messageHistory.joinToString())
-                    adapter.submitList(messageHistory)
-                    recyclerView.scrollToPosition(messageHistory.lastIndex)
+                    adapter.submitList(messageHistory) {
+                        if (messageHistory.isNotEmpty()) recyclerView.scrollToPosition(
+                            messageHistory.lastIndex
+                        )
+                    }
                 }
             }
         }

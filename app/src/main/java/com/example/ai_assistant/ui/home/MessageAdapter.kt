@@ -1,28 +1,22 @@
 package com.example.ai_assistant.ui.home
 
-import android.annotation.SuppressLint
 import android.view.View
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.ai_assistant.R
-import com.example.ai_assistant.models.ChatResponseModels.Choice
 import android.view.ViewGroup
 import android.view.LayoutInflater
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import com.example.ai_assistant.models.UIModels.ChatMessageUI
 import com.example.ai_assistant.models.UIModels.SenderType
 
-class MessageAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    val messageList = mutableListOf<ChatMessageUI>()
 
-    @SuppressLint("NotifyDataSetChanged")
-    fun submitList(newChoiceList:List<ChatMessageUI>) {
-        messageList.clear()
-        messageList.addAll(newChoiceList)
-        notifyDataSetChanged()
-    }
+class MessageAdapter() : ListAdapter<ChatMessageUI, RecyclerView.ViewHolder >(MessageDiffCallBack()) {
+
     override fun getItemViewType(position: Int): Int {
-        return when (messageList[position].sender) {
+        return when ( getItem(position).sender) {
             SenderType.USER -> 0
             SenderType.AI -> 1
         }
@@ -37,6 +31,16 @@ class MessageAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     class AiMessageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvMessageText: TextView =
             view.findViewById(R.id.AImessageText)
+    }
+
+    class MessageDiffCallBack: DiffUtil.ItemCallback<ChatMessageUI>()  {
+        override fun areItemsTheSame(oldItem: ChatMessageUI, newItem: ChatMessageUI): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: ChatMessageUI, newItem: ChatMessageUI): Boolean {
+            return oldItem == newItem
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -66,13 +70,10 @@ class MessageAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val messageItem = messageList[position]
+        val messageItem = getItem(position)
         when (holder){
             is UserMessageViewHolder -> holder.tvMessageText.text = messageItem.text
             is AiMessageViewHolder ->  holder.tvMessageText.text = messageItem.text
         }
-
-
     }
-    override fun getItemCount(): Int = messageList.size
 }

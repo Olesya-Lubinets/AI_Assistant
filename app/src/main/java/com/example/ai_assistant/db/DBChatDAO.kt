@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.ai_assistant.models.dbModels.DBChat
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DBChatDAO {
@@ -17,8 +18,11 @@ interface DBChatDAO {
     suspend fun delete(dbChat: DBChat)
 
     @Query("SELECT * FROM chats")
-    suspend fun getAll(): List<DBChat>
+    fun getAll(): Flow<List<DBChat>>
 
     @Query("SELECT * FROM chats WHERE id = :id")
     suspend fun getById(id: Long): DBChat?
+
+    @Query("UPDATE chats SET title = :title WHERE id = :chatId")
+    suspend fun updateTitle(chatId: Long, title: String)
 }
