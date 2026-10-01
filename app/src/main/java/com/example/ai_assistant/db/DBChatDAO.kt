@@ -25,4 +25,7 @@ interface DBChatDAO {
 
     @Query("UPDATE chats SET title = :title WHERE id = :chatId")
     suspend fun updateTitle(chatId: Long, title: String)
+
+    @Query("SELECT * FROM chats WHERE title LIKE '%'||:query||'%'")
+    fun searchChats(query:String):Flow<List<DBChat>>
 }

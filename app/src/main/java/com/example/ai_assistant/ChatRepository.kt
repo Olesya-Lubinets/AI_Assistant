@@ -16,4 +16,6 @@ class ChatRepository @Inject constructor(val dao: DBChatDAO) {
     suspend fun getChatByID(id: Long): DBChat? = dao.getById(id)
 
     suspend fun updateChatTitle(id:Long,title:String) = dao.updateTitle(id,title)
+
+    fun searchChats(query:String) = dao.searchChats(query)
 }

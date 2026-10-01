@@ -2,6 +2,7 @@ package com.example.ai_assistant
 
 import android.os.Bundle
 import android.view.Menu
+import android.widget.SearchView
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
@@ -68,18 +69,35 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.drawerContent.btnNewChat.setOnClickListener {
-            navController.navigate(R.id.nav_chat)
-        }
-
-        binding.drawerContent.btnNewChat.setOnClickListener {
             chatViewModel.createChat()
         }
+
+        binding.drawerContent.searchChatsView.setOnQueryTextListener(
+            object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    return false
+                }
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    chatViewModel.searchChat(newText.orEmpty())
+                    return true
+                }
+            }
+        )
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 chatViewModel.chatID.collect { id ->
                     navController.navigate(R.id.nav_chat, bundleOf("chatID" to id))
                     binding.drawerLayout.closeDrawer(GravityCompat.START)
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                chatViewModel.searchResult.collect { chatList ->
+                    adapter.submitList(chatList)
                 }
             }
         }

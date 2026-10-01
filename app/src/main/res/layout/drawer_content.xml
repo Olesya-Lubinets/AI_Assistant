@@ -6,11 +6,18 @@
     android:padding="16dp"
     android:background="@color/purple_200">
 
+
     <include
         android:id="@+id/drawer_header"
         layout="@layout/nav_header_main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
+    <SearchView
+        android:id="@+id/searchChatsView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:queryHint="Search chats" />
 
     <Button
         android:id="@+id/btn_newChat"
