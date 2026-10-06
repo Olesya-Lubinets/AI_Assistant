@@ -23,6 +23,7 @@ import androidx.core.view.GravityCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -62,8 +63,8 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                chatViewModel.listOfChats.collect { chatList ->
-                    adapter.submitList(chatList)
+                chatViewModel.listOfChats.collectLatest { chatList ->
+                    adapter.submitData(chatList)
                 }
             }
         }
@@ -96,8 +97,8 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                chatViewModel.searchResult.collect { chatList ->
-                    adapter.submitList(chatList)
+                chatViewModel.searchResult.collectLatest { chatList ->
+                    adapter.submitData(chatList)
                 }
             }
         }

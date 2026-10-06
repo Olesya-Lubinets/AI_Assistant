@@ -1,5 +1,6 @@
 package com.example.ai_assistant.db
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -17,8 +18,8 @@ interface DBChatDAO {
     @Delete
     suspend fun delete(dbChat: DBChat)
 
-    @Query("SELECT * FROM chats")
-    fun getAll(): Flow<List<DBChat>>
+    @Query("SELECT * FROM chats ORDER BY createdAt DESC")
+    fun getAll(): PagingSource<Int,DBChat>
 
     @Query("SELECT * FROM chats WHERE id = :id")
     suspend fun getById(id: Long): DBChat?
@@ -26,6 +27,7 @@ interface DBChatDAO {
     @Query("UPDATE chats SET title = :title WHERE id = :chatId")
     suspend fun updateTitle(chatId: Long, title: String)
 
-    @Query("SELECT * FROM chats WHERE title LIKE '%'||:query||'%'")
-    fun searchChats(query:String):Flow<List<DBChat>>
+    @Query("SELECT * FROM chats " +
+            "WHERE title LIKE '%'||:query||'%' ORDER BY createdAt DESC")
+    fun searchChats(query:String):PagingSource<Int,DBChat>
 }

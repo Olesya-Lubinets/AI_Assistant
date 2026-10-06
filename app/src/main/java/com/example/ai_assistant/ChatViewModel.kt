@@ -3,6 +3,7 @@ package com.example.ai_assistant
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
 import com.example.ai_assistant.models.dbModels.DBChat
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -38,10 +39,10 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
         }
     }
 
-    val listOfChats: StateFlow<List<DBChat>> = chatRepository.getAllChats().stateIn(
+    val listOfChats: StateFlow<PagingData<DBChat>> = chatRepository.getAllChats().stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
+        initialValue = PagingData.empty()
     )
 
     private var _searchQuery = MutableStateFlow("")
@@ -50,14 +51,15 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
         _searchQuery.value = query
     }
 
-    val searchResult = _searchQuery
+
+    val searchResult:StateFlow<PagingData<DBChat>> = _searchQuery
         .debounce(300)
         .flatMapLatest { query ->
-            if (query.isBlank()) chatRepository.getAllChats()
+           if (query.isBlank()) chatRepository.getAllChats()
             else chatRepository.searchChats(query) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
+            initialValue = PagingData.empty()
         )
 }

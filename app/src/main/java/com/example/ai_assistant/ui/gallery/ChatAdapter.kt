@@ -4,13 +4,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.ai_assistant.R
 import com.example.ai_assistant.models.dbModels.DBChat
 import android.view.ViewGroup
+import androidx.paging.PagingDataAdapter
 
-class ChatAdapter(private val onItemClicked:(DBChat) -> Unit) : ListAdapter<DBChat, ChatAdapter.ChatViewHolder>(ChatDiffCallBack()) {
+class ChatAdapter(private val onItemClicked:(DBChat) -> Unit) : PagingDataAdapter<DBChat, ChatAdapter.ChatViewHolder>(ChatDiffCallBack()) {
 
     class ChatViewHolder(view: View): RecyclerView.ViewHolder(view) {
         val tvChatTitle = view.findViewById<TextView>(R.id.tvChatTitle)
@@ -34,7 +34,7 @@ class ChatAdapter(private val onItemClicked:(DBChat) -> Unit) : ListAdapter<DBCh
     }
 
     override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
-        val chatItem = getItem(position)
+        val chatItem = getItem(position) ?: return
         holder.tvChatTitle.text = chatItem.title
         holder.tvChatDate.text = chatItem.createdAt.toString()
 

@@ -54,11 +54,13 @@ dependencies {
     implementation(libs.firebase.crashlytics.buildtools)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
+    implementation(libs.androidx.paging.runtime.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
+    implementation(libs.androidx.room.paging)
 
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
@@ -66,4 +68,5 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     ksp(libs.room.compiler)
+
 }
